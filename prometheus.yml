@@ -5,4 +5,4 @@ scrape_configs:
   - job_name: 'bolttickets-api'
     metrics_path: /metrics
     static_configs:
-      - targets: ['host.docker.internal:5000'] # Assuming running locally outside docker
+      - targets: ['host.docker.internal:5162'] # API runs on port 5162 per launchSettings.json
