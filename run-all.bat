@@ -35,6 +35,9 @@ if %errorlevel% neq 0 (
 echo Waiting for services to be ready...
 timeout /t 10 /nobreak > nul
 
+echo Stopping any running .NET processes...
+taskkill /f /im dotnet.exe >nul 2>&1
+
 echo Building .NET projects...
 dotnet build src
 if %errorlevel% neq 0 (
