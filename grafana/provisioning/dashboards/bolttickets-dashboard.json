@@ -1,0 +1,84 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "BoltTickets API Dashboard",
+    "tags": ["bolttickets"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "HTTP Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_total[5m])",
+            "legendFormat": "{{method}} {{status_code}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "HTTP Request Duration (95th percentile)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_server_duration_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "GC Collections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(dotnet_gc_collections_total[5m])",
+            "legendFormat": "{{generation}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Memory Usage (MB)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "dotnet_total_memory_bytes / 1024 / 1024",
+            "legendFormat": "Total Memory"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Target Health",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"bolttickets-api\"}",
+            "legendFormat": "API Up"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Scrape Duration",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "scrape_duration_seconds{job=\"bolttickets-api\"}",
+            "legendFormat": "Scrape Time"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 16}
+      }
+    ],
+    "time": {"from": "now-1h", "to": "now"},
+    "refresh": "5s"
+  }
+}
