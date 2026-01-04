@@ -9,7 +9,10 @@ namespace BoltTickets.Infrastructure.Services;
 
 public class RedisTicketNotificationService : ITicketNotificationService
 {
+    private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<RedisTicketNotificationService> _logger;
+    private const string BookingChannel = "booking-notifications";
+    private const string InventoryChannel = "inventory-notifications";
 
     public RedisTicketNotificationService(IConnectionMultiplexer redis, ILogger<RedisTicketNotificationService> logger)
     {
