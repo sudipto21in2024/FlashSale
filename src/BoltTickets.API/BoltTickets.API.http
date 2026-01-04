@@ -1,0 +1,6 @@
+@BoltTickets.API_HostAddress = http://localhost:5162
+
+GET {{BoltTickets.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
