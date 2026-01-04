@@ -65,7 +65,7 @@ if not exist node_modules (
         exit /b 1
     )
 )
-start "Frontend" cmd /c "npm run dev > ..\logs\frontend.log 2>&1"
+start "Frontend" cmd /k "cd /d %~dp0\src\BoltTickets.Frontend && npm run dev"
 
 cd ..
 echo Waiting for services to start...
