@@ -19,6 +19,7 @@ builder.Host.UseSerilog();
 // Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 
 // Clean Architecture
@@ -59,6 +60,9 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 //app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
 

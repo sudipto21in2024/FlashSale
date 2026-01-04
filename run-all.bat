@@ -34,10 +34,18 @@ if not exist node_modules (
         exit /b 1
     )
 )
-start "Frontend" cmd /c "npm run dev > logs/frontend.log 2>&1"
+start "Frontend" cmd /c "npm run dev > ..\logs\frontend.log 2>&1"
 
 cd ..
+echo Waiting for services to start...
+timeout /t 5 /nobreak > nul
+
+echo Opening browsers...
+start http://localhost:5162/swagger
+start http://localhost:5173
+
 echo All services started!
-echo API: http://localhost:5162
-echo Frontend: Check console for port (usually http://localhost:5173)
+echo API: http://localhost:5162/swagger
+echo Frontend: http://localhost:5173
 echo Infrastructure: See docker-compose.yml for ports
+pause
