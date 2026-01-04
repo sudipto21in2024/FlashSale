@@ -30,8 +30,11 @@ export function TicketDashboard() {
     }, [])
 
     useEffect(() => {
+        console.log(`[TicketDashboard] Setting up listeners for connection, userId: ${userId}`)
         if (connection) {
+            console.log(`[TicketDashboard] Connection state: ${connection.state}`)
             const joinGroup = () => {
+                console.log(`[TicketDashboard] Joining group for userId: ${userId}`)
                 connection.invoke("JoinTicketGroup", userId)
                     .then(() => console.log("Joined notification group:", userId))
                     .catch(err => console.error("Error joining group", err));
@@ -44,6 +47,7 @@ export function TicketDashboard() {
                 // Also wait for initial connect
                 const startInterval = setInterval(() => {
                     if (connection.state === "Connected") {
+                        console.log(`[TicketDashboard] Connection now connected, joining group`)
                         joinGroup();
                         clearInterval(startInterval);
                     }
@@ -51,7 +55,9 @@ export function TicketDashboard() {
                 return () => clearInterval(startInterval);
             }
 
+            console.log(`[TicketDashboard] Setting up event listeners`)
             connection.on("inventoryupdated", (data: any) => {
+                console.log("[TicketDashboard] Received inventoryupdated:", data);
                 let count = 0;
                 if (typeof data === 'number') {
                     count = data;
@@ -63,25 +69,30 @@ export function TicketDashboard() {
             })
 
             connection.on("bookingconfirmed", (data: any) => {
-                console.log("Booking Confirmed:", data);
+                console.log("[TicketDashboard] Received bookingconfirmed:", data);
                 const bId = data.BookingId || data.bookingId;
                 setStatus(`Confirmed! Booking ID: ${bId.slice(0, 8)}...`)
             })
 
             connection.on("anybookingconfirmed", (data: any) => {
-                console.log("DEBUG: Any Booking Confirmed:", data);
+                console.log("[TicketDashboard] Received anybookingconfirmed:", data);
                 const uId = data.UserId || data.userId;
+                console.log(`[TicketDashboard] Checking userId match: received ${uId}, local ${userId}`)
                 if (uId === userId) {
+                    console.log("[TicketDashboard] UserId matches, updating status")
                     const bId = data.BookingId || data.bookingId;
                     setStatus(`Confirmed! Booking ID: ${bId.slice(0, 8)}...`);
+                } else {
+                    console.log("[TicketDashboard] UserId does not match, ignoring")
                 }
             })
 
             connection.on("heartbeat", (data: any) => {
-                console.log("DEBUG: Heartbeat:", data);
+                console.log("[TicketDashboard] Received heartbeat:", data);
             })
         }
         return () => {
+            console.log(`[TicketDashboard] Cleaning up listeners`)
             connection?.off("inventoryupdated")
             connection?.off("bookingconfirmed")
             connection?.off("anybookingconfirmed")

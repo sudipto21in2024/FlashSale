@@ -50,14 +50,16 @@ public class SignalRNotificationWorker : BackgroundService
                         var data = JsonSerializer.Deserialize<JsonElement>(message!);
                         var userId = data.GetProperty("UserId").GetGuid();
                         var bookingId = data.GetProperty("BookingId").GetGuid();
-                        _logger.LogInformation($"[SignalRWorker] Publishing anybookingconfirmed for UserId={userId}, BookingId={bookingId}");
+                        _logger.LogInformation($"[SignalRWorker] Deserialized UserId={userId}, BookingId={bookingId}");
+                        _logger.LogInformation($"[SignalRWorker] Publishing anybookingconfirmed to all clients");
                         await _hubContext.Clients.All.SendAsync("anybookingconfirmed", new { BookingId = bookingId, UserId = userId });
+                        _logger.LogInformation($"[SignalRWorker] Published anybookingconfirmed to all clients");
                         await _hubContext.Clients.Group(userId.ToString()).SendAsync("bookingconfirmed", new { BookingId = bookingId, Status = "Confirmed" });
                         _logger.LogInformation($"[SignalRWorker] Sent bookingconfirmed to group {userId}");
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "[SignalRWorker] Error processing booking notification");
+                        _logger.LogError(ex, "[SignalRWorker] Error processing booking notification: {Message}", ex.Message);
                     }
                 });
 

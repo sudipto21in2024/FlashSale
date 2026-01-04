@@ -5,6 +5,7 @@ export function useSignalR(hubUrl: string) {
     const [connection, setConnection] = useState<HubConnection | null>(null)
 
     useEffect(() => {
+        console.log(`[SignalR] Creating connection to ${hubUrl}`)
         const connect = new HubConnectionBuilder()
             .withUrl(hubUrl)
             .configureLogging(LogLevel.Trace)
