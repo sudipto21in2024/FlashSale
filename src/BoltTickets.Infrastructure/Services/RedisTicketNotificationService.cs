@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using BoltTickets.Application.Common.Interfaces;
 using BoltTickets.Domain.Entities;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace BoltTickets.Infrastructure.Services;
