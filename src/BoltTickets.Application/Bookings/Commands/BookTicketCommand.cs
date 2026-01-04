@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using BoltTickets.Application.Common.Interfaces;
 using BoltTickets.Domain.Entities;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using OpenTelemetry.Trace;
 
 namespace BoltTickets.Application.Bookings.Commands;
@@ -24,11 +26,13 @@ public class BookTicketCommandHandler : IRequestHandler<BookTicketCommand, Guid>
 {
     private readonly ITicketCacheService _ticketCache;
     private readonly IBookingProducer _bookingProducer;
+    private readonly ILogger<BookTicketCommandHandler> _logger;
 
-    public BookTicketCommandHandler(ITicketCacheService ticketCache, IBookingProducer bookingProducer)
+    public BookTicketCommandHandler(ITicketCacheService ticketCache, IBookingProducer bookingProducer, ILogger<BookTicketCommandHandler> logger)
     {
         _ticketCache = ticketCache;
         _bookingProducer = bookingProducer;
+        _logger = logger;
     }
 
     /// <summary>
@@ -43,6 +47,8 @@ public class BookTicketCommandHandler : IRequestHandler<BookTicketCommand, Guid>
         using var activity = ActivitySource.StartActivity("BookTicket");
         activity?.SetTag("ticket.id", request.TicketId);
         activity?.SetTag("user.id", request.UserId);
+
+        _logger.LogInformation("BookTicket activity started. TraceId: {TraceId}, SpanId: {SpanId}", Activity.Current?.TraceId, Activity.Current?.SpanId);
 
         // 1. Fast check against Redis
         var reserved = await _ticketCache.TryReserveTicketAsync(request.TicketId);

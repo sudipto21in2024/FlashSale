@@ -98,7 +98,7 @@ public class BookingWorker : BackgroundService
         activity?.SetTag("user.id", booking.UserId);
         activity?.SetTag("ticket.id", booking.TicketId);
 
-        _logger.LogInformation($"[WORKER] Processing booking intent: {booking.Id} for user {booking.UserId}");
+        _logger.LogInformation("[WORKER] Processing booking intent: {BookingId} for user {UserId}. TraceId: {TraceId}, SpanId: {SpanId}", booking.Id, booking.UserId, Activity.Current?.TraceId, Activity.Current?.SpanId);
 
         try 
         {
