@@ -1,0 +1,43 @@
+@echo off
+echo Starting BoltTickets Application...
+
+echo Starting Docker services...
+docker-compose up -d
+if %errorlevel% neq 0 (
+    echo Docker Compose failed!
+    exit /b 1
+)
+
+echo Waiting for services to be ready...
+timeout /t 10 /nobreak > nul
+
+echo Building .NET projects...
+dotnet build src
+if %errorlevel% neq 0 (
+    echo Build failed!
+    exit /b 1
+)
+
+echo Starting API...
+start "API" cmd /c "dotnet run --project src/BoltTickets.API"
+
+echo Starting Worker...
+start "Worker" cmd /c "dotnet run --project src/BoltTickets.Worker"
+
+echo Starting Frontend...
+cd src\BoltTickets.Frontend
+if not exist node_modules (
+    echo Installing npm dependencies...
+    npm install
+    if %errorlevel% neq 0 (
+        echo npm install failed!
+        exit /b 1
+    )
+)
+start "Frontend" cmd /c "npm run dev"
+
+cd ..
+echo All services started!
+echo API: http://localhost:5162
+echo Frontend: Check console for port (usually http://localhost:5173)
+echo Infrastructure: See docker-compose.yml for ports
