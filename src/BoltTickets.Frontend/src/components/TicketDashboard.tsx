@@ -13,6 +13,8 @@ export function TicketDashboard() {
     const [available, setAvailable] = useState(5000)
     const [loading, setLoading] = useState(false)
     const [status, setStatus] = useState("")
+    const [isLoading, setIsLoading] = useState(true)
+    const [prevAvailable, setPrevAvailable] = useState(5000)
 
     useEffect(() => {
         const fetchInitialCount = async () => {
@@ -30,77 +32,88 @@ export function TicketDashboard() {
     }, [])
 
     useEffect(() => {
-        console.log(`[TicketDashboard] Setting up listeners for connection, userId: ${userId}`)
-        if (connection) {
-            console.log(`[TicketDashboard] Connection state: ${connection.state}`)
-            const joinGroup = () => {
-                console.log(`[TicketDashboard] Joining group for userId: ${userId}`)
-                connection.invoke("JoinTicketGroup", userId)
-                    .then(() => console.log("Joined notification group:", userId))
-                    .catch(err => console.error("Error joining group", err));
-            };
+    console.log(`[TicketDashboard] Setting up listeners for connection, userId: ${userId}`)
+    if (!connection) {
+        console.log('[TicketDashboard] No connection yet');
+        return;
+    }
 
-            if (connection.state === "Connected") {
-                joinGroup();
-            } else {
-                connection.onreconnected(joinGroup);
-                // Also wait for initial connect
-                const startInterval = setInterval(() => {
-                    if (connection.state === "Connected") {
-                        console.log(`[TicketDashboard] Connection now connected, joining group`)
-                        joinGroup();
-                        clearInterval(startInterval);
-                    }
-                }, 500);
-                return () => clearInterval(startInterval);
-            }
-
-            console.log(`[TicketDashboard] Setting up event listeners`)
-            connection.on("inventoryupdated", (data: any) => {
-                console.log("[TicketDashboard] Received inventoryupdated:", data);
-                let count = 0;
-                if (typeof data === 'number') {
-                    count = data;
-                } else {
-                    count = data.AvailableCount ?? data.availableCount ?? 0;
-                }
-                console.log("Updated count:", count);
-                setAvailable(count)
-            })
-
-            connection.on("bookingconfirmed", (data: any) => {
-                console.log("[TicketDashboard] Received bookingconfirmed:", data);
-                const bId = data.BookingId || data.bookingId;
-                setStatus(`Confirmed! Booking ID: ${bId.slice(0, 8)}...`)
-            })
-
-            connection.on("anybookingconfirmed", (data: any) => {
-                console.log("[TicketDashboard] Received anybookingconfirmed:", data);
-                const uId = data.UserId || data.userId;
-                console.log(`[TicketDashboard] Checking userId match: received ${uId}, local ${userId}, types: ${typeof uId} vs ${typeof userId}`)
-                if (uId === userId) {
-                    console.log("[TicketDashboard] UserId matches, updating status")
-                    const bId = data.BookingId || data.bookingId;
-                    const newStatus = `Confirmed! Booking ID: ${bId.slice(0, 8)}...`;
-                    console.log(`[TicketDashboard] Setting status to: ${newStatus}`)
-                    setStatus(newStatus);
-                } else {
-                    console.log("[TicketDashboard] UserId does not match, ignoring")
-                }
-            })
-
-            connection.on("heartbeat", (data: any) => {
-                console.log("[TicketDashboard] Received heartbeat:", data);
-            })
+    console.log(`[TicketDashboard] Connection state: ${connection.state}`)
+    
+    const joinGroup = async () => {
+        console.log(`[TicketDashboard] Attempting to join group for userId: ${userId}`)
+        try {
+            await connection.invoke("JoinTicketGroup", userId);
+            console.log("✅ Successfully joined notification group:", userId);
+        } catch (err) {
+            console.error("❌ Error joining group", err);
         }
-        return () => {
-            console.log(`[TicketDashboard] Cleaning up listeners`)
-            connection?.off("inventoryupdated")
-            connection?.off("bookingconfirmed")
-            connection?.off("anybookingconfirmed")
-            connection?.off("heartbeat")
+    };
+
+    // Set up all event listeners FIRST
+    console.log(`[TicketDashboard] Setting up event listeners`)
+    
+    connection.on("inventoryupdated", (data: any) => {
+        console.log("[TicketDashboard] Received inventoryupdated:", data);
+        let count = 0;
+        if (typeof data === 'number') {
+            count = data;
+        } else {
+            count = data.AvailableCount ?? data.availableCount ?? 0;
         }
-    }, [connection, userId]);
+        console.log("Updated count:", count);
+        setAvailable(count)
+    })
+
+    connection.on("bookingconfirmed", (data: any) => {
+        console.log("[TicketDashboard] ✅ Received bookingconfirmed (GROUP MESSAGE):", data);
+        const bId = data.BookingId || data.bookingId;
+        setStatus(`Confirmed! Booking ID: ${bId.slice(0, 8)}...`)
+    })
+
+    connection.on("anybookingconfirmed", (data: any) => {
+        console.log("[TicketDashboard] Received anybookingconfirmed:", data);
+        console.log("[TicketDashboard] Raw data:", JSON.stringify(data));
+        const uId = data.UserId || data.userId;
+        console.log(`[TicketDashboard] Checking userId match: received "${uId}", local "${userId}"`)
+        
+        if (uId === userId || uId?.toLowerCase?.() === userId.toLowerCase()) {
+            console.log("[TicketDashboard] ✅ UserId matches, updating status")
+            const bId = data.BookingId || data.bookingId;
+            const newStatus = `Confirmed! Booking ID: ${bId.slice(0, 8)}...`;
+            console.log(`[TicketDashboard] Setting status to: ${newStatus}`)
+            setStatus(newStatus);
+        } else {
+            console.log("[TicketDashboard] ❌ UserId does not match, ignoring")
+        }
+    })
+
+    connection.on("heartbeat", (data: any) => {
+        console.log("[TicketDashboard] 💓 Received heartbeat:", data);
+    })
+
+    // THEN try to join the group
+    if (connection.state === "Connected") {
+        joinGroup();
+    } else {
+        // Wait for connection, then join
+        connection.start().then(() => {
+            console.log('[TicketDashboard] Connection started, now joining group');
+            joinGroup();
+        }).catch(err => {
+            console.error('[TicketDashboard] Failed to start connection:', err);
+        });
+    }
+
+    return () => {
+        console.log(`[TicketDashboard] Cleaning up listeners`)
+        connection?.off("inventoryupdated")
+        connection?.off("bookingconfirmed")
+        connection?.off("anybookingconfirmed")
+        connection?.off("heartbeat")
+        connection?.off("test-group-message")
+    }
+}, [connection, userId]);
 
     // Debug connection state changes
     useEffect(() => {

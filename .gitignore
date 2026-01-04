@@ -1,162 +1,48 @@
-# .NET
+# Binaries for .NET projects
 bin/
 obj/
+
+# User-specific files
 *.user
 *.suo
-*.cache
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
 *.log
-*.tmp
-*.temp
+redis_monitor.log
+worker_error.log
+build_error.log
+build_log_2.txt
+build_log_metrics.txt
+
+# NuGet packages
 packages/
-.vs/
-*.nupkg
-*.snupkg
+
+# Node.js dependencies (for Frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+*.exe
+*.dll
 *.pdb
-*.aps
-*.pch
-*.vspscc
-*_i.c
-*_p.c
-*.ncb
-*.suo
-*.tlb
-*.tlh
-*.tmp
-*.tmp_proj
-*.log
-*.vspscc
-*.vssscc
-.builds
-*.pidb
-*.log
-*.svclog
-*.scc
-*.swp
-*.swo
-*~
+*.exe.config
 
-# ReSharper
-_ReSharper*/
-*.[Rr]e[Ss]harper
-*.DotSettings.user
+# Test results
+TestResults/
+*.trx
 
-# TeamCity
-_TeamCity*
-
-# DotCover
-*.dotCover
-
-# NCrunch
-_NCrunch_*
-.*crunch*.local.xml
-
-# MightyMoose
-*.mm.*
-AutoTest.Net/
-
-# Web workbench
-.sass-cache/
-
-# Installshield output folder
-[Ee]xpress/
-
-# DocProject is a documentation generator add-in
-DocProject/buildhelp/
-DocProject/Help/*.HxT
-DocProject/Help/*.HxC
-DocProject/Help/*.hhc
-DocProject/Help/*.hhk
-DocProject/Help/*.hhp
-DocProject/Help/*.HtmlHelp
-DocProject/Help/*.log
-DocProject/Help/*.xlg
-DocProject/Help/*.xlg
-
-# Click-Once directory
-publish/
-
-# Publish output
-*.[Pp]ublish.xml
-*.azurePubxml
-# TODO: Comment the next line if you want to checkin your web deploy settings
-# but database connection strings (with potential passwords) will be unencrypted
-*.pubxml
-*.publishproj
-
-# Microsoft Azure Web App publish settings. Comment the next line if you want to
-# checkin your Azure Web App publish settings, but sensitive information contained
-# in these scripts will be unencrypted
-PublishScripts/
-
-# NuGet Packages
-*.nupkg
-# The packages folder can be ignored because of Package Restore
-**/packages/*
-# except build/, which is used as an MSBuild target.
-!**/packages/build/
-# Uncomment if necessary however generally it will be regenerated when needed
-#!**/packages/repositories.config
-
-# Microsoft Azure Build Output
-csx/
-*.build.csdef
-
-# Microsoft Azure Emulator
-ecf/
-rcf/
-
-# Windows Store app package directories and files
-AppPackages/
-BundleArtifacts/
-Package.StoreAssociation.xml
-_pkginfo.txt
-
-# Visual Studio cache files
-# files ending in .cache can be ignored
-*.cache
-# but keep track of directories ending in .cache
-!*.[Cc]ache/
-
-# Others
-ClientBin/
-~$*
-*~
-*.dbmdl
-*.dbproj.schemaview
-*.jfm
-*.pfx
-*.publishsettings
-*.swp
-*.swo
-*.[Cc]ache
-/.vs
-*.vsidx
-*.vspscc
-*.vssscc
-*.suo
-*.user
-*.aps
-*.pch
-*.vspscc
-*_i.c
-*_p.c
-*.ncb
-*.suo
-*.tlb
-*.tlh
-*.tmp
-*.tmp_proj
-*.log
-*.vspscc
-*.vssscc
-.builds
-*.pidb
-*.log
-*.svclog
-*.scc
-*.swp
-*.swo
-*~
+# Code coverage
+*.coverage
+*.coveragexml
 
 # OS generated files
 .DS_Store
@@ -167,123 +53,27 @@ ClientBin/
 ehthumbs.db
 Thumbs.db
 
-# Node.js (for frontend)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Temporary files
+*.tmp
+*.temp
 
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Docker (if needed, but usually not)
+# docker-compose.override.yml
 
-node_modules
-dist
-dist-ssr
-*.local
+# Secrets and environment files
+# appsettings.*.json (uncomment if you want to ignore, but keep Development)
+# .env
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
+# Database files
+*.db
+*.sqlite
 
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
+# OpenTelemetry or other runtime files
+# (usually handled by bin/obj)
 
-# nyc test coverage
-.nyc_output
+# Frontend build
+src/BoltTickets.Frontend/dist/
+src/BoltTickets.Frontend/build/
 
-# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
-.grunt
-
-# Bower dependency directory (https://bower.io/)
-bower_components
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons (https://nodejs.org/api/addons.html)
-build/Release
-
-# Dependency directories
-jspm_packages/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-.env.test
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
-# Gatsby files
-.cache/
-public
-
-# Storybook build outputs
-.out
-.storybook-out
-
-# Temporary folders
-tmp/
-temp/
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Docker
-.dockerignore
-
-# Project-specific logs
-redis_monitor.log
-build_error.log
-build_log_2.txt
-build_log_metrics.txt
-worker_error.log
+# Prometheus data (if any)
+# prometheus_data/

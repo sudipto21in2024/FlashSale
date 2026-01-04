@@ -52,9 +52,9 @@ public class SignalRNotificationWorker : BackgroundService
                         var bookingId = data.GetProperty("BookingId").GetGuid();
                         _logger.LogInformation($"[SignalRWorker] Deserialized UserId={userId}, BookingId={bookingId}");
                         _logger.LogInformation($"[SignalRWorker] Publishing anybookingconfirmed to all clients");
-                        await _hubContext.Clients.All.SendAsync("anybookingconfirmed", new { BookingId = bookingId, UserId = userId });
+                        await _hubContext.Clients.All.SendAsync("anybookingconfirmed", new { BookingId = bookingId.ToString(), UserId = userId.ToString() });
                         _logger.LogInformation($"[SignalRWorker] Published anybookingconfirmed to all clients");
-                        await _hubContext.Clients.Group(userId.ToString()).SendAsync("bookingconfirmed", new { BookingId = bookingId, Status = "Confirmed" });
+                        await _hubContext.Clients.Group(userId.ToString()).SendAsync("bookingconfirmed", new { BookingId = bookingId.ToString(), Status = "Confirmed" });
                         _logger.LogInformation($"[SignalRWorker] Sent bookingconfirmed to group {userId}");
                     }
                     catch (Exception ex)
@@ -75,7 +75,7 @@ public class SignalRNotificationWorker : BackgroundService
                         _logger.LogInformation($"[SignalRWorker] Publishing inventoryupdated for TicketId={ticketId}, Count={count}");
                         await _hubContext.Clients.All.SendAsync("inventoryupdated", new
                         {
-                            TicketId = ticketId,
+                            TicketId = ticketId.ToString(),
                             AvailableCount = count
                         });
                     }

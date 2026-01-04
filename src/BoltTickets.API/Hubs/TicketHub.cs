@@ -22,5 +22,9 @@ public class TicketHub : Hub
     {
         _logger.LogInformation($"Client {Context.ConnectionId} joining group: {userId}");
         await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+         await Clients.Group(userId).SendAsync("test-group-message", new { 
+        Message = "You successfully joined the group!",
+        UserId = userId 
+    });
     }
 }
