@@ -1,10 +1,34 @@
 @echo off
-echo Starting BoltTickets Application...
+cd /d %~dp0
+echo Starting BoltTickets Application from %cd%
+
+echo Checking prerequisites...
+where docker-compose >nul 2>&1
+if %errorlevel% neq 0 (
+    echo docker-compose not found! Please install Docker.
+    pause
+    exit /b 1
+)
+
+where dotnet >nul 2>&1
+if %errorlevel% neq 0 (
+    echo dotnet not found! Please install .NET SDK.
+    pause
+    exit /b 1
+)
+
+where npm >nul 2>&1
+if %errorlevel% neq 0 (
+    echo npm not found! Please install Node.js.
+    pause
+    exit /b 1
+)
 
 echo Starting Docker services...
 docker-compose up -d
 if %errorlevel% neq 0 (
     echo Docker Compose failed!
+    pause
     exit /b 1
 )
 
