@@ -1,5 +1,6 @@
 @echo off
 cd /d %~dp0
+mkdir logs 2>nul
 echo Starting BoltTickets Application from %cd%
 
 echo Checking prerequisites...
