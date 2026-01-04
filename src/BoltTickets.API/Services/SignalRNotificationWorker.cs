@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ public class SignalRNotificationWorker : BackgroundService
     private readonly IConnectionMultiplexer _redis;
     private const string BookingChannel = "booking-notifications";
     private const string InventoryChannel = "inventory-notifications";
+    private static readonly ActivitySource ActivitySource = new("BoltTickets.SignalR");
 
     public SignalRNotificationWorker(
         ILogger<SignalRNotificationWorker> logger,
@@ -44,12 +46,15 @@ public class SignalRNotificationWorker : BackgroundService
                 // Booking confirmation callback
                 await sub.SubscribeAsync(BookingChannel, async (channel, message) =>
                 {
-                    _logger.LogInformation($"[SignalRWorker] Received raw booking message: {message}");
+                    using var activity = ActivitySource.StartActivity("ProcessBookingNotification");
+                    _logger.LogInformation($"[SignalRWorker] Received raw booking message: {message}. TraceId: {Activity.Current?.TraceId}, SpanId: {Activity.Current?.SpanId}");
                     try
                     {
                         var data = JsonSerializer.Deserialize<JsonElement>(message!);
                         var userId = data.GetProperty("UserId").GetGuid();
                         var bookingId = data.GetProperty("BookingId").GetGuid();
+                        activity?.SetTag("booking.id", bookingId);
+                        activity?.SetTag("user.id", userId);
                         _logger.LogInformation($"[SignalRWorker] Deserialized UserId={userId}, BookingId={bookingId}");
                         _logger.LogInformation($"[SignalRWorker] Publishing anybookingconfirmed to all clients");
                         await _hubContext.Clients.All.SendAsync("anybookingconfirmed", new { BookingId = bookingId.ToString(), UserId = userId.ToString() });
@@ -59,6 +64,7 @@ public class SignalRNotificationWorker : BackgroundService
                     }
                     catch (Exception ex)
                     {
+                        activity?.AddException(ex);
                         _logger.LogError(ex, "[SignalRWorker] Error processing booking notification: {Message}", ex.Message);
                     }
                 });
@@ -66,12 +72,15 @@ public class SignalRNotificationWorker : BackgroundService
                 // Inventory update callback
                 await sub.SubscribeAsync(InventoryChannel, async (channel, message) =>
                 {
-                    _logger.LogInformation($"[SignalRWorker] Received raw inventory message: {message}");
+                    using var activity = ActivitySource.StartActivity("ProcessInventoryNotification");
+                    _logger.LogInformation($"[SignalRWorker] Received raw inventory message: {message}. TraceId: {Activity.Current?.TraceId}, SpanId: {Activity.Current?.SpanId}");
                     try
                     {
                         var data = JsonSerializer.Deserialize<JsonElement>(message!);
                         var ticketId = data.GetProperty("TicketId").GetGuid();
                         var count = data.GetProperty("AvailableCount").GetInt32();
+                        activity?.SetTag("ticket.id", ticketId);
+                        activity?.SetTag("available.count", count);
                         _logger.LogInformation($"[SignalRWorker] Publishing inventoryupdated for TicketId={ticketId}, Count={count}");
                         await _hubContext.Clients.All.SendAsync("inventoryupdated", new
                         {
@@ -81,6 +90,7 @@ public class SignalRNotificationWorker : BackgroundService
                     }
                     catch (Exception ex)
                     {
+                        activity?.AddException(ex);
                         _logger.LogError(ex, "[SignalRWorker] Error processing inventory notification");
                     }
                 });
