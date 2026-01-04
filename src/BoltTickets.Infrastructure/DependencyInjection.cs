@@ -45,7 +45,7 @@ public static class DependencyInjection
                     .AddHttpClientInstrumentation()
                     .AddEntityFrameworkCoreInstrumentation()
                     .AddRedisInstrumentation()
-                    .AddSource("BoltTickets.API", "BoltTickets.Worker", "BoltTickets.Notification", "BoltTickets.SignalR")
+                    .AddSource("BoltTickets.API", "BoltTickets.Worker", "BoltTickets.Notification", "BoltTickets.SignalR", "BoltTickets.Repository")
                     .SetResourceBuilder(ResourceBuilder.CreateDefault()
                         .AddService(configuration["OTEL_SERVICE_NAME"] ?? "BoltTickets.System"))
                     .AddOtlpExporter(options => 
