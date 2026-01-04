@@ -51,6 +51,9 @@ start "API" cmd /c "dotnet run --project src/BoltTickets.API"
 echo Starting Worker...
 start "Worker" cmd /c "dotnet run --project src/BoltTickets.Worker"
 
+echo Stopping any running Node.js processes...
+taskkill /f /im node.exe >nul 2>&1
+
 echo Starting Frontend...
 cd src\BoltTickets.Frontend
 if not exist node_modules (
