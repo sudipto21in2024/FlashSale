@@ -24,7 +24,7 @@ public class Booking
     public BookingStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
 
-    private Booking() { }
+    public Booking() { } // For EF and JSON deserialization
 
     public Booking(Guid ticketId, Guid userId)
     {
