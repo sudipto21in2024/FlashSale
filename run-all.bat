@@ -69,7 +69,7 @@ start "Frontend" cmd /k "cd /d %~dp0\src\BoltTickets.Frontend && npm run dev"
 
 cd ..
 echo Waiting for services to start...
-timeout /t 5 /nobreak > nul
+timeout /t 10 /nobreak > nul
 
 echo Opening browsers...
 start http://localhost:5162/swagger
