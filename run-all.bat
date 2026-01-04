@@ -34,7 +34,7 @@ if not exist node_modules (
         exit /b 1
     )
 )
-start "Frontend" cmd /c "npm run dev"
+start "Frontend" cmd /c "npm run dev > logs/frontend.log 2>&1"
 
 cd ..
 echo All services started!

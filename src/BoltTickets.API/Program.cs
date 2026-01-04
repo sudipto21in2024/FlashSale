@@ -4,12 +4,14 @@ using BoltTickets.Application;
 using BoltTickets.Infrastructure;
 using BoltTickets.API.Services;
 using Serilog;
+using Serilog.Sinks.File;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
+    .WriteTo.File("logs/api.log", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
 builder.Host.UseSerilog();
