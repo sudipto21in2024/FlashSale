@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.Trace;
+using OpenTelemetry.Context.Propagation;
 using System.Diagnostics;
 
 namespace BoltTickets.Worker;
@@ -58,6 +59,32 @@ public class BookingWorker : BackgroundService
                 try
                 {
                     var result = consumer.Consume(stoppingToken);
+
+                    // Log headers for debugging
+                    var headers = string.Join(", ", result.Message.Headers.Select(h => $"{h.Key}={System.Text.Encoding.UTF8.GetString(h.GetValueBytes())}"));
+                    _logger.LogInformation($"[WORKER] Received message headers: {headers}");
+
+                    // Extract trace context from headers
+                    var parentContext = Propagators.DefaultTextMapPropagator.Extract(default, result.Message.Headers, (carrier, key) =>
+                    {
+                        if (carrier.TryGetLastBytes(key, out var bytes))
+                        {
+                            return new[] { System.Text.Encoding.UTF8.GetString(bytes) };
+                        }
+                        return new string[0];
+                    });
+
+                    // Set the current activity context
+                    if (parentContext.ActivityContext != default)
+                    {
+                        Activity.Current = new Activity("KafkaConsume").SetParentId(parentContext.ActivityContext.TraceId, parentContext.ActivityContext.SpanId, parentContext.ActivityContext.TraceFlags);
+                        _logger.LogInformation($"[WORKER] Set current activity to parent TraceId: {parentContext.ActivityContext.TraceId}, SpanId: {parentContext.ActivityContext.SpanId}");
+                    }
+                    else
+                    {
+                        _logger.LogInformation("[WORKER] No parent context found in headers");
+                    }
+
                     var booking = JsonSerializer.Deserialize<Booking>(result.Message.Value);
 
                     if (booking != null)
