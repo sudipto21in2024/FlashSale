@@ -77,11 +77,13 @@ export function TicketDashboard() {
             connection.on("anybookingconfirmed", (data: any) => {
                 console.log("[TicketDashboard] Received anybookingconfirmed:", data);
                 const uId = data.UserId || data.userId;
-                console.log(`[TicketDashboard] Checking userId match: received ${uId}, local ${userId}`)
+                console.log(`[TicketDashboard] Checking userId match: received ${uId}, local ${userId}, types: ${typeof uId} vs ${typeof userId}`)
                 if (uId === userId) {
                     console.log("[TicketDashboard] UserId matches, updating status")
                     const bId = data.BookingId || data.bookingId;
-                    setStatus(`Confirmed! Booking ID: ${bId.slice(0, 8)}...`);
+                    const newStatus = `Confirmed! Booking ID: ${bId.slice(0, 8)}...`;
+                    console.log(`[TicketDashboard] Setting status to: ${newStatus}`)
+                    setStatus(newStatus);
                 } else {
                     console.log("[TicketDashboard] UserId does not match, ignoring")
                 }
