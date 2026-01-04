@@ -5,6 +5,6 @@ interface AppState {
     // Add more state as needed
 }
 
-export const useStore = create<AppState>((set) => ({
+export const useStore = create<AppState>((_set) => ({
     userId: window.crypto.randomUUID()
 }))
