@@ -13,8 +13,6 @@ export function TicketDashboard() {
     const [available, setAvailable] = useState(5000)
     const [loading, setLoading] = useState(false)
     const [status, setStatus] = useState("")
-    const [isLoading, setIsLoading] = useState(true)
-    const [prevAvailable, setPrevAvailable] = useState(5000)
 
     useEffect(() => {
         const fetchInitialCount = async () => {
