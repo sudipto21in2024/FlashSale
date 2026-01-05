@@ -16,19 +16,19 @@ if %errorlevel% neq 0 (
 )
 
 echo Building Docker images...
-docker build -t bolttickets/api:latest ..\src\BoltTickets.API
+docker build -t bolttickets/api:latest "%~dp0..\src\BoltTickets.API"
 if %errorlevel% neq 0 (
     echo Failed to build API image. Error: %errorlevel%
     goto :error
 )
 
-docker build -t bolttickets/worker:latest ..\src\BoltTickets.Worker
+docker build -t bolttickets/worker:latest "%~dp0..\src\BoltTickets.Worker"
 if %errorlevel% neq 0 (
     echo Failed to build Worker image. Error: %errorlevel%
     goto :error
 )
 
-docker build -t bolttickets/frontend:latest ..\src\BoltTickets.Frontend
+docker build -t bolttickets/frontend:latest "%~dp0..\src\BoltTickets.Frontend"
 if %errorlevel% neq 0 (
     echo Failed to build Frontend image. Error: %errorlevel%
     goto :error
