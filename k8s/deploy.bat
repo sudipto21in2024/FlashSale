@@ -39,25 +39,6 @@ if %errorlevel% neq 0 (
 )
 popd
 
-echo Loading images into Minikube...
-minikube image load bolttickets/api:latest
-if %errorlevel% neq 0 (
-    echo Failed to load API image. Error: %errorlevel%
-    goto :error
-)
-
-minikube image load bolttickets/worker:latest
-if %errorlevel% neq 0 (
-    echo Failed to load Worker image. Error: %errorlevel%
-    goto :error
-)
-
-minikube image load bolttickets/frontend:latest
-if %errorlevel% neq 0 (
-    echo Failed to load Frontend image. Error: %errorlevel%
-    goto :error
-)
-
 echo Deploying to Kubernetes...
 kubectl apply -f namespace.yaml
 if %errorlevel% neq 0 (
