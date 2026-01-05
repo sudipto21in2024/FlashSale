@@ -3,13 +3,13 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY BoltTickets.Frontend/package*.json ./
 
 # Install dependencies
 RUN npm ci
 
 # Copy source code
-COPY . .
+COPY BoltTickets.Frontend/ ./
 
 # Build the application
 RUN npm run build

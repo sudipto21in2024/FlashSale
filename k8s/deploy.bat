@@ -16,23 +16,28 @@ if %errorlevel% neq 0 (
 )
 
 echo Building Docker images...
-docker build -t bolttickets/api:latest "%~dp0..\src\BoltTickets.API"
+pushd "%~dp0..\src"
+docker build -t bolttickets/api:latest -f BoltTickets.API/Dockerfile .
 if %errorlevel% neq 0 (
     echo Failed to build API image. Error: %errorlevel%
+    popd
     goto :error
 )
 
-docker build -t bolttickets/worker:latest "%~dp0..\src\BoltTickets.Worker"
+docker build -t bolttickets/worker:latest -f BoltTickets.Worker/Dockerfile .
 if %errorlevel% neq 0 (
     echo Failed to build Worker image. Error: %errorlevel%
+    popd
     goto :error
 )
 
-docker build -t bolttickets/frontend:latest "%~dp0..\src\BoltTickets.Frontend"
+docker build -t bolttickets/frontend:latest -f BoltTickets.Frontend/Dockerfile .
 if %errorlevel% neq 0 (
     echo Failed to build Frontend image. Error: %errorlevel%
+    popd
     goto :error
 )
+popd
 
 echo Loading images into Minikube...
 minikube image load bolttickets/api:latest
