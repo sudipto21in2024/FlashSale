@@ -73,6 +73,10 @@ echo   Prometheus: kubectl port-forward -n bolttickets svc/prometheus 9090:9090
 echo   Grafana: kubectl port-forward -n bolttickets svc/grafana 3000:3000 (admin/admin)
 echo   Jaeger: kubectl port-forward -n bolttickets svc/jaeger 16686:16686
 
+echo Opening web endpoints...
+start http://app.localhost
+start http://api.localhost
+
 goto :end
 
 :error
