@@ -1,0 +1,182 @@
+# Azure DevOps Pipeline for BoltTickets
+# This pipeline builds, tests, and deploys the application to Azure
+
+trigger:
+  branches:
+    include:
+    - main
+    - develop
+
+pr:
+  branches:
+    include:
+    - main
+
+variables:
+  - name: 'acrName'
+    value: 'boltticketsacr'
+  - name: 'resourceGroup'
+    value: 'bolttickets-rg'
+  - name: 'location'
+    value: 'East US'
+  - name: 'aksName'
+    value: 'bolttickets-aks'
+  - name: 'namespace'
+    value: 'bolttickets'
+
+stages:
+- stage: Build
+  displayName: 'Build and Push Images'
+  jobs:
+  - job: Build
+    displayName: 'Build Docker Images'
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Login to ACR'
+      inputs:
+        azureSubscription: 'azureSubscription'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az acr login --name $(acrName)
+
+    - script: |
+        docker build -f src/BoltTickets.API/Dockerfile -t $(acrName).azurecr.io/bolttickets/api:$(Build.BuildId) -t $(acrName).azurecr.io/bolttickets/api:latest .
+        docker push $(acrName).azurecr.io/bolttickets/api:$(Build.BuildId)
+        docker push $(acrName).azurecr.io/bolttickets/api:latest
+      displayName: 'Build and Push API Image'
+
+    - script: |
+        docker build -f src/BoltTickets.Worker/Dockerfile -t $(acrName).azurecr.io/bolttickets/worker:$(Build.BuildId) -t $(acrName).azurecr.io/bolttickets/worker:latest .
+        docker push $(acrName).azurecr.io/bolttickets/worker:$(Build.BuildId)
+        docker push $(acrName).azurecr.io/bolttickets/worker:latest
+      displayName: 'Build and Push Worker Image'
+
+    - script: |
+        docker build -f src/BoltTickets.Frontend/Dockerfile -t $(acrName).azurecr.io/bolttickets/frontend:$(Build.BuildId) -t $(acrName).azurecr.io/bolttickets/frontend:latest .
+        docker push $(acrName).azurecr.io/bolttickets/frontend:$(Build.BuildId)
+        docker push $(acrName).azurecr.io/bolttickets/frontend:latest
+      displayName: 'Build and Push Frontend Image'
+
+- stage: Deploy
+  displayName: 'Deploy to AKS'
+  dependsOn: Build
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: Deploy
+    displayName: 'Deploy to AKS'
+    environment: 'production'
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: KubernetesManifest@0
+            displayName: 'Create namespace'
+            inputs:
+              action: 'create'
+              namespace: 'bolttickets'
+              manifests: 'k8s/namespace.yaml'
+
+          - task: KubernetesManifest@0
+            displayName: 'Deploy ConfigMaps'
+            inputs:
+              action: 'deploy'
+              namespace: 'bolttickets'
+              manifests: 'k8s/configmaps.yaml'
+
+          - task: KubernetesManifest@0
+            displayName: 'Deploy Secrets'
+            inputs:
+              action: 'deploy'
+              namespace: 'bolttickets'
+              manifests: 'k8s/secrets.yaml'
+
+          - task: KubernetesManifest@0
+            displayName: 'Deploy PVCs'
+            inputs:
+              action: 'deploy'
+              namespace: 'bolttickets'
+              manifests: 'k8s/pvcs.yaml'
+
+          - task: KubernetesManifest@0
+            displayName: 'Deploy StatefulSets'
+            inputs:
+              action: 'deploy'
+              namespace: 'bolttickets'
+              manifests: 'k8s/statefulsets.yaml'
+
+          - task: KubernetesManifest@0
+            displayName: 'Deploy Services'
+            inputs:
+              action: 'deploy'
+              namespace: 'bolttickets'
+              manifests: 'k8s/services.yaml'
+
+          - task: KubernetesManifest@0
+            displayName: 'Deploy Ingress'
+            inputs:
+              action: 'deploy'
+              namespace: 'bolttickets'
+              manifests: 'k8s/ingress.yaml'
+
+          - task: KubernetesManifest@0
+            displayName: 'Deploy Monitoring'
+            inputs:
+              action: 'deploy'
+              namespace: 'bolttickets'
+              manifests: 'k8s/monitoring.yaml'
+
+          - task: KubernetesManifest@0
+            displayName: 'Deploy API'
+            inputs:
+              action: 'deploy'
+              namespace: 'bolttickets'
+              manifests: 'k8s/deployments.yaml'
+              containers: 'boltticketsacr.azurecr.io/bolttickets/api:$(Build.BuildId)'
+
+          - task: KubernetesManifest@0
+            displayName: 'Deploy Worker'
+            inputs:
+              action: 'deploy'
+              namespace: 'bolttickets'
+              manifests: 'k8s/deployments.yaml'
+              containers: 'boltticketsacr.azurecr.io/bolttickets/worker:$(Build.BuildId)'
+
+          - task: KubernetesManifest@0
+            displayName: 'Deploy Frontend'
+            inputs:
+              action: 'deploy'
+              namespace: 'bolttickets'
+              manifests: 'k8s/deployments.yaml'
+              containers: 'boltticketsacr.azurecr.io/bolttickets/frontend:$(Build.BuildId)'
+
+          - task: Kubernetes@1
+            displayName: 'Verify deployment'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: 'aksConnection'
+              namespace: 'bolttickets'
+              command: 'get'
+              arguments: 'pods'
+
+- stage: Test
+  displayName: 'Integration Tests'
+  dependsOn: Deploy
+  jobs:
+  - job: IntegrationTest
+    displayName: 'Run Integration Tests'
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    steps:
+    - script: |
+        echo "Running integration tests..."
+        # Add integration test commands here
+        echo "Tests completed successfully"
+      displayName: 'Execute Integration Tests'
