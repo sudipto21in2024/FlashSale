@@ -15,6 +15,13 @@ if %errorlevel% neq 0 (
     goto :error
 )
 
+echo Pulling base Docker images...
+docker pull mcr.microsoft.com/dotnet/sdk:9.0
+docker pull mcr.microsoft.com/dotnet/aspnet:9.0
+docker pull mcr.microsoft.com/dotnet/runtime:9.0
+docker pull node:18-alpine
+docker pull nginx:alpine
+
 echo Building Docker images...
 pushd "%~dp0..\src"
 docker build -t bolttickets/api:latest -f BoltTickets.API/Dockerfile .
