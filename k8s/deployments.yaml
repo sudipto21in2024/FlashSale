@@ -64,6 +64,22 @@ spec:
         - name: config
           mountPath: /app/appsettings.json
           subPath: appsettings.json
+        livenessProbe:
+          exec:
+            command:
+              - dotnet
+              - BoltTickets.Worker.dll
+              - --health
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+              - dotnet
+              - BoltTickets.Worker.dll
+              - --health
+          initialDelaySeconds: 5
+          periodSeconds: 5
       volumes:
       - name: config
         configMap:
